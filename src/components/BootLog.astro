@@ -93,6 +93,15 @@ const lines = [
     min-width: 100%;
   }
 
+  :global(.boot-pending) .console .row {
+    visibility: hidden;
+  }
+
+  :global(.boot-pending) .console::after {
+    content: '';
+    height: 8em;
+  }
+
   .console.printing .row:not(.shown) {
     display: none;
   }
@@ -300,7 +309,10 @@ const lines = [
       logRow(filter, [es ? 'Zona horaria: ' : 'Time zone: ', { value: `${c.zone} (${c.utc})` }]),
     ].filter((r): r is HTMLDivElement => Boolean(r));
     el.append(...request);
-    if (reduced) return;
+    if (reduced) {
+      document.documentElement.classList.remove('boot-pending');
+      return;
+    }
 
     const rows = [...el.querySelectorAll<HTMLElement>('.row')];
     const delay: Record<string, () => number> = {
@@ -310,6 +322,7 @@ const lines = [
       last: () => 650,
     };
 
+    document.documentElement.classList.remove('boot-pending');
     el.style.height = `${el.offsetHeight}px`;
     el.classList.add('printing');
 
