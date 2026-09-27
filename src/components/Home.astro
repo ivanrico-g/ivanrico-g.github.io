@@ -1,0 +1,363 @@
+---
+import Base from '../layouts/Base.astro';
+import Sidebar from './Sidebar.astro';
+import BootLog from './BootLog.astro';
+import Experience from './Experience.astro';
+import Projects from './Projects.astro';
+import { about, skills, education, courses, person, l, type Lang } from '../data/profile';
+import { ui, formatRange, formatYM } from '../data/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const featuredCourses = courses.filter((c) => c.featured);
+const moreCourses = courses.filter((c) => !c.featured);
+const studies = [...education].sort((a, b) => (b.to ?? '9999-12').localeCompare(a.to ?? '9999-12'));
+---
+
+<Base lang={lang}>
+  <div class="shell">
+    <Sidebar lang={lang} />
+
+    <main id="main" class="content">
+      <BootLog lang={lang} />
+
+      <section id="about" aria-labelledby="about-title">
+        <h2 id="about-title">{t.nav.about}</h2>
+        <div class="prose">
+          {about.map((p) => <p>{l(p, lang)}</p>)}
+        </div>
+      </section>
+
+      <section id="experience" aria-labelledby="experience-title">
+        <h2 id="experience-title">{t.nav.experience}</h2>
+        <Experience lang={lang} />
+      </section>
+
+      <section id="projects" aria-labelledby="projects-title">
+        <h2 id="projects-title">{t.nav.projects}</h2>
+        <Projects lang={lang} />
+      </section>
+
+      <section id="skills" aria-labelledby="skills-title">
+        <h2 id="skills-title">{t.nav.skills}</h2>
+        <dl class="skills">
+          {
+            skills.map((group) => (
+              <div class="skill-group">
+                <dt>
+                  <span class="group-name">{l(group.name, lang)}</span>
+                </dt>
+                <dd>
+                  <ul class="tags">
+                    {group.items.map((item) => (
+                      <li class="tag">{l(item, lang)}</li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      <section id="education" aria-labelledby="education-title">
+        <h2 id="education-title">{t.nav.education}</h2>
+        <ol class="studies">
+          {
+            studies.map((s) => (
+              <li>
+                <div class="study-main">
+                  <h3>{l(s.title, lang)}</h3>
+                  <p class="study-org">{s.org}</p>
+                  {s.note && <p class="study-note">{l(s.note, lang)}</p>}
+                </div>
+                <p class="study-range">{formatRange(s.from, s.to, lang)}</p>
+              </li>
+            ))
+          }
+        </ol>
+
+        <h3 class="certs-title">{t.courses}</h3>
+        <ul class="certs">
+          {
+            featuredCourses.map((c) => (
+              <li>
+                {c.url ? (
+                  <a class="course-link" href={c.url} target="_blank" rel="noopener noreferrer">{c.name}</a>
+                ) : (
+                  <span>{c.name}</span>
+                )}
+                <span class="cert-meta">{c.issuer}, {formatYM(c.date, lang)}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <details class="more-courses">
+          <summary>
+            <span class="when-closed">{t.moreCourses(moreCourses.length)}</span>
+            <span class="when-open">{t.lessCourses}</span>
+          </summary>
+          <ul class="certs">
+            {
+              moreCourses.map((c) => (
+                <li>
+                  {c.url ? (
+                  <a class="course-link" href={c.url} target="_blank" rel="noopener noreferrer">{c.name}</a>
+                ) : (
+                  <span>{c.name}</span>
+                )}
+                  <span class="cert-meta">{c.issuer}, {formatYM(c.date, lang)}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </details>
+        <p class="certs-link"><a href={person.links.platzi} target="_blank" rel="noopener noreferrer">{t.allCerts}</a></p>
+      </section>
+
+      <section id="contact" aria-labelledby="contact-title">
+        <h2 id="contact-title">{t.nav.contact}</h2>
+        <p class="contact-actions">
+          <a class="mail" href={`mailto:${person.email}`}>{t.writeMe}</a>
+          <span class="mail-address">{person.email}</span>
+        </p>
+      </section>
+
+    </main>
+  </div>
+</Base>
+
+<style>
+  .shell {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.25rem 4rem;
+  }
+
+  .content {
+    margin-top: 3rem;
+    display: grid;
+    gap: 5.5rem;
+    min-width: 0;
+  }
+
+  @media (min-width: 64em) {
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: 4rem;
+      padding: 0 3rem;
+    }
+
+    .content {
+      margin-top: 0;
+      padding: 6rem 0;
+    }
+  }
+
+  section {
+    scroll-margin-top: 3rem;
+  }
+
+  h2 {
+    font-size: var(--step-2);
+    margin-bottom: 1.75rem;
+  }
+
+  .prose {
+    display: grid;
+    gap: 1rem;
+    max-width: 65ch;
+  }
+
+  .skills {
+    margin: 0;
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .skill-group {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  @media (min-width: 40em) {
+    .skill-group {
+      grid-template-columns: 13rem 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  dt {
+    display: grid;
+  }
+
+  .group-name {
+    color: var(--text-strong);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    align-self: center;
+  }
+
+  .studies {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .studies li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.2rem 1.5rem;
+  }
+
+  .study-main {
+    max-width: 44ch;
+  }
+
+  .studies h3 {
+    font-size: var(--step-0);
+  }
+
+  .study-org,
+  .study-range {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .study-range {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .study-note {
+    margin-top: 0.2rem;
+    font-size: var(--step--1);
+    color: var(--accent);
+  }
+
+  .certs-title {
+    margin: 2.75rem 0 1rem;
+    font-size: var(--step-1);
+  }
+
+  .certs {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 40em) {
+    .certs {
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: 2rem;
+    }
+  }
+
+  .certs li {
+    display: grid;
+    align-content: start;
+  }
+
+  .course-link {
+    color: inherit;
+    text-decoration-color: var(--line);
+  }
+
+  .course-link:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+
+  .cert-meta {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .more-courses {
+    margin-top: 0.5rem;
+  }
+
+  .more-courses > .certs {
+    margin-top: 0.5rem;
+  }
+
+  summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    color: var(--accent);
+    font-size: var(--step--1);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: '';
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-0.15rem) rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+
+  details[open] summary::after {
+    transform: translateY(0.1rem) rotate(-135deg);
+  }
+
+  .when-open,
+  details[open] .when-closed {
+    display: none;
+  }
+
+  details[open] .when-open {
+    display: inline;
+  }
+
+  .certs-link {
+    margin-top: 1rem;
+    font-size: var(--step--1);
+  }
+
+  .contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+  }
+
+  .mail {
+    display: inline-block;
+    padding: 0.75rem 1.3rem;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .mail:hover {
+    filter: brightness(1.08);
+  }
+
+  .mail-address {
+    color: var(--muted);
+    user-select: all;
+  }
+
+</style>

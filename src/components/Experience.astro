@@ -1,0 +1,246 @@
+---
+import { experience, l, type Lang } from '../data/profile';
+import { ui, formatRange, formatDuration } from '../data/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const jobs = [...experience].sort((a, b) => (a.lane === b.lane ? b.from.localeCompare(a.from) : a.lane === 'work' ? -1 : 1));
+---
+
+<div class="graph">
+  <p class="legend">
+    <span class="key work">{t.laneWork}</span>
+    <span class="key own">{t.laneOwn}</span>
+  </p>
+  <ol class="commits">
+    {
+      jobs.map((job) => (
+        <li class:list={['commit', job.lane]}>
+          <span class="rail" aria-hidden="true">
+            <span class="node" />
+          </span>
+          <article class="body">
+            <header class="head">
+              <h3>{job.org}</h3>
+              <p class="range">{formatRange(job.from, job.to, lang)}</p>
+            </header>
+            <p class="kind">{l(job.kind, lang)} | <span data-from={job.from} data-to={job.to ?? ''}>{formatDuration(job.from, job.to, lang)}</span></p>
+            {job.roles && (
+              <ol class="roles">
+                {job.roles.map((role) => (
+                  <li>
+                    <span class="role-title">{l(role.title, lang)}</span>
+                    <span class="role-range">{formatRange(role.from, role.to, lang)}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <p class="summary">{l(job.summary, lang)}</p>
+            {job.points && (
+              <ul class="points">
+                {job.points.map((p) => (
+                  <li>{l(p, lang)}</li>
+                ))}
+              </ul>
+            )}
+            {job.stack.length > 0 && (
+              <ul class="tags">
+                {job.stack.map((s) => (
+                  <li class="tag">{s}</li>
+                ))}
+              </ul>
+            )}
+          </article>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<script>
+  import { formatDuration } from '../data/ui';
+  import type { Lang, YearMonth } from '../data/profile';
+
+  const lang = document.documentElement.lang as Lang;
+  document.querySelectorAll<HTMLElement>('[data-from]').forEach((el) => {
+    el.textContent = formatDuration(el.dataset.from as YearMonth, (el.dataset.to || null) as YearMonth | null, lang);
+  });
+</script>
+
+<style>
+  .graph {
+    --lane-work: var(--accent);
+    --lane-own: var(--log-info);
+    --x-work: 0.55rem;
+    --x-own: 1.55rem;
+  }
+
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .key::before {
+    content: '';
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    margin-right: 0.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--lane-work);
+    vertical-align: -0.05em;
+  }
+
+  .key.own::before {
+    border-color: var(--lane-own);
+  }
+
+  .commits {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .commit {
+    display: grid;
+    grid-template-columns: 2.4rem 1fr;
+    gap: 1rem;
+  }
+
+  .rail {
+    position: relative;
+  }
+
+  .rail::before,
+  .rail::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    border-radius: 1px;
+  }
+
+  .rail::before {
+    left: calc(var(--x-work) - 1px);
+    background: color-mix(in srgb, var(--lane-work) 45%, transparent);
+  }
+
+  .rail::after {
+    left: calc(var(--x-own) - 1px);
+    background: color-mix(in srgb, var(--lane-own) 40%, transparent);
+  }
+
+  .node {
+    position: absolute;
+    top: 0.45rem;
+    left: calc(var(--x-work) - 0.45rem);
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--lane-work);
+    z-index: 1;
+  }
+
+  .own .node {
+    left: calc(var(--x-own) - 0.45rem);
+    border-color: var(--lane-own);
+  }
+
+  .body {
+    padding-bottom: 2.75rem;
+  }
+
+  .commit:last-child .body {
+    padding-bottom: 0;
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+  }
+
+  .head h3 {
+    font-size: var(--step-1);
+  }
+
+  .range {
+    font-size: var(--step--1);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kind {
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+
+  .roles {
+    margin: 0.9rem 0 0;
+    padding: 0 0 0 0.9rem;
+    list-style: none;
+    border-left: 1px solid var(--line);
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .roles li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0 1rem;
+  }
+
+  .roles li:first-child .role-title {
+    color: var(--text-strong);
+    font-weight: 600;
+  }
+
+  .role-range {
+    font-size: var(--step--1);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .summary {
+    margin-top: 0.9rem;
+    max-width: 65ch;
+  }
+
+  .points {
+    margin-top: 0.6rem;
+    max-width: 65ch;
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .points li {
+    position: relative;
+    padding-left: 1.1rem;
+  }
+
+  .points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 0.4rem;
+    height: 1px;
+    background: var(--muted);
+  }
+
+  .tags {
+    margin-top: 1rem;
+  }
+</style>

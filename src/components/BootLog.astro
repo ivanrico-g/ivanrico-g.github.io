@@ -1,0 +1,334 @@
+---
+import { person, type Lang } from '../data/profile';
+import { ui, yearsSince } from '../data/ui';
+import { springBanner } from '../data/banner';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const b = ui[lang].boot;
+const years = yearsSince(person.careerStart);
+const bannerRows = springBanner.split('\n');
+const signature = ` :: ${person.name} ::`.padEnd(34) + `(v${years})`;
+
+const start = new Date();
+const clock = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'America/Bogota',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  fractionalSecondDigits: 3,
+  hourCycle: 'h23',
+});
+const stamp = (offset: number) => clock.format(new Date(start.getTime() + offset));
+const now = Number(new Intl.DateTimeFormat('en', { timeZone: 'America/Bogota', year: 'numeric' }).format(start));
+const lines = [
+  { year: 2021, ms: 0, logger: 'com.ivanricog.IvanRicoApplication', msg: b.starting },
+  { year: 2021, ms: 36, logger: 'com.ivanricog.project.ColonoPlaza', msg: b.colono },
+  { year: 2022, ms: 214, logger: 'com.ivanricog.career.ArtifexTech', msg: b.artifex },
+  { year: 2023, ms: 377, logger: 'com.ivanricog.project.Softvibes', msg: b.softvibes },
+  { year: 2024, ms: 512, logger: 'com.ivanricog.career.ArtifexTech', msg: b.fullstack },
+  { year: 2025, ms: 689, logger: 'com.ivanricog.project.Hydronotis', msg: b.hydronotis },
+  { year: 2026, ms: 841, logger: 'com.ivanricog.career.ArtifexTech', msg: b.solutions },
+  { year: now, ms: 903, logger: 'com.ivanricog.IvanRicoApplication', msg: b.profiles },
+  { year: now, ms: 917, logger: 'com.ivanricog.career.Availability', msg: b.open },
+  { year: now, ms: 1307, logger: 'com.ivanricog.career.IvanRicoApplication', msg: b.started(years), done: true },
+];
+---
+
+<figure class="boot" data-lang={lang} data-career-start={person.careerStart} aria-label={lang === 'es' ? 'Registro de arranque' : 'Startup log'}>
+  <div class="console" tabindex="0">
+    {
+      bannerRows.map((row) => (
+        <div class="row banner" data-speed="banner" aria-hidden="true">{row}</div>
+      ))
+    }
+    <div class="row banner sig" data-speed="banner" data-years={years} aria-hidden="true">{signature}</div>
+    <div class="row blank" data-speed="banner" aria-hidden="true"> </div>
+    {
+      lines.map((line) => (
+        <div class:list={['row', 'log', { done: line.done }]} data-speed={line.done ? 'last' : 'log'}><span class="time" aria-hidden="true">{stamp(line.ms)}</span><span class="level">INFO</span><span class="year">{line.year}</span><span class="logger" aria-hidden="true">{line.logger}</span><span class="msg" data-years={line.done ? years : undefined}>{line.msg}</span></div>
+      ))
+    }
+  </div>
+</figure>
+
+<style>
+  .boot {
+    margin: 0;
+    background: var(--log-bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.6;
+    color: #c9ced8;
+    overflow: hidden;
+  }
+
+  .console {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.3rem 1.25rem 1.4rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+
+  .console::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .console::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 4px;
+  }
+
+  .row {
+    white-space: pre;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .console.printing .row:not(.shown) {
+    display: none;
+  }
+
+  .banner {
+    color: #9fb7d4;
+  }
+
+  .sig {
+    color: var(--log-info);
+    font-weight: 600;
+  }
+
+  .row > span + span {
+    margin-left: 0.75ch;
+  }
+
+  .time {
+    color: var(--log-time);
+  }
+
+  .level {
+    color: var(--log-info);
+  }
+
+  .year {
+    color: var(--log-pid);
+  }
+
+  .logger {
+    color: var(--log-logger);
+  }
+
+  .logger::after {
+    content: ' :';
+    color: var(--log-time);
+  }
+
+  .msg {
+    color: #e3e7ee;
+  }
+
+  .val.ip {
+    color: var(--log-pid);
+    font-weight: 600;
+  }
+
+  .done .msg {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  @media (min-width: 64em) {
+    .boot {
+      margin-right: calc(-1 * min(22rem, max(0px, (100vw - 76rem) / 2) + 1rem));
+    }
+  }
+
+  @media (max-width: 40em) {
+    .console {
+      padding: 1rem;
+    }
+
+    .boot {
+      font-size: 0.68rem;
+    }
+  }
+</style>
+
+<script>
+  import { yearsSince } from '../data/ui';
+  import type { YearMonth } from '../data/profile';
+
+  const consoleEl = document.querySelector<HTMLElement>('.boot .console');
+
+  const careerStart = document.querySelector<HTMLElement>('.boot')?.dataset.careerStart as YearMonth | undefined;
+  if (careerStart) {
+    const years = yearsSince(careerStart);
+    document.querySelectorAll<HTMLElement>('.boot [data-years]').forEach((el) => {
+      el.textContent = el.textContent!.replace(`${el.dataset.years}`, years);
+    });
+  }
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  type UAData = {
+    platform: string;
+    getHighEntropyValues(hints: string[]): Promise<{ platformVersion?: string; fullVersionList?: { brand: string; version: string }[] }>;
+  };
+
+  function browserFromUA(ua: string) {
+    const names: Record<string, string> = { Edg: 'Edge', OPR: 'Opera', CriOS: 'Chrome', SamsungBrowser: 'Samsung Internet' };
+    const m = ua.match(/(Edg|OPR|Firefox|SamsungBrowser)\/([\d.]+)/) ?? ua.match(/(Chrome|CriOS)\/([\d.]+)/);
+    if (m) return `${names[m[1]] ?? m[1]} ${m[2]}`;
+    const safari = ua.match(/Version\/([\d.]+).*Safari/);
+    return safari ? `Safari ${safari[1]}` : 'unknown';
+  }
+
+  function systemFromUA(ua: string) {
+    const dots = (v: string) => v.replace(/_/g, '.');
+    let m;
+    if (/Windows NT/.test(ua)) return 'Windows';
+    if ((m = ua.match(/Android ([\d.]+)/))) return `Android ${m[1]}`;
+    if ((m = ua.match(/(?:iPhone|iPad).*OS ([\d_]+)/))) return `iOS ${dots(m[1])}`;
+    if ((m = ua.match(/Mac OS X ([\d_]+)/))) return `macOS ${dots(m[1])}`;
+    if (/Linux/.test(ua)) return 'Linux';
+    return 'unknown';
+  }
+
+  async function clientInfo() {
+    const ua = navigator.userAgent;
+    let browser = browserFromUA(ua);
+    let system = systemFromUA(ua);
+    const uaData = (navigator as Navigator & { userAgentData?: UAData }).userAgentData;
+    if (uaData) {
+      try {
+        const hi = await uaData.getHighEntropyValues(['platformVersion', 'fullVersionList']);
+        const brand = hi.fullVersionList?.find((b) => !/Not|Chromium/.test(b.brand));
+        if (brand) browser = `${brand.brand.replace('Google ', '').replace('Microsoft ', '')} ${brand.version}`;
+        const major = Number(hi.platformVersion?.split('.')[0] ?? 0);
+        if (uaData.platform === 'Windows') system = major >= 13 ? 'Windows 11' : 'Windows 10';
+        else if (uaData.platform === 'macOS' && hi.platformVersion) system = `macOS ${hi.platformVersion}`;
+        else if (uaData.platform) system = system.startsWith(uaData.platform) ? system : uaData.platform;
+      } catch {}
+    }
+
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const offset = -new Date().getTimezoneOffset();
+    const utc = `UTC${offset >= 0 ? '+' : '-'}${String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0')}:${String(Math.abs(offset) % 60).padStart(2, '0')}`;
+
+    let geo: { ip?: string; city?: string; country?: string } = {};
+    try {
+      const res = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: AbortSignal.timeout(1500) });
+      geo = await res.json();
+    } catch {}
+
+    return { browser, system, zone, utc, ip: geo.ip ?? '', place: [geo.city, geo.country].filter(Boolean).join(', ') };
+  }
+
+  const scope = consoleEl?.getAttributeNames().find((a) => a.startsWith('data-astro-cid')) ?? '';
+
+  function span(className: string, text: string) {
+    const el = document.createElement('span');
+    el.className = className;
+    el.textContent = text;
+    return el;
+  }
+
+  type Part = string | { value: string; ip?: boolean };
+  function logRow(logger: string, parts: Part[]) {
+    const time = new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      fractionalSecondDigits: 3,
+      hourCycle: 'h23',
+    }).format(new Date());
+    const msg = span('msg', '');
+    for (const part of parts) {
+      if (typeof part === 'string') msg.append(part);
+      else {
+        const val = span(part.ip ? 'val ip' : 'val', reduced ? part.value : part.value.replace(/\S/g, '·'));
+        val.dataset.value = part.value;
+        msg.append(val);
+      }
+    }
+    const div = document.createElement('div');
+    div.className = 'row log client';
+    div.dataset.speed = 'client';
+    div.setAttribute('aria-hidden', 'true');
+    div.append(
+      span('time', time),
+      span('level', 'INFO'),
+      span('year', String(new Date().getFullYear())),
+      span('logger', logger),
+      msg,
+    );
+    if (scope) [div, ...div.querySelectorAll('*')].forEach((n) => n.setAttribute(scope, ''));
+    return div;
+  }
+
+  function decode(el: HTMLElement) {
+    const text = el.dataset.value ?? '';
+    const glyphs = '0123456789abcdef#%&/<>{}';
+    let frame = 0;
+    const frames = 16;
+    const timer = setInterval(() => {
+      frame++;
+      const done = Math.floor((text.length * frame) / frames);
+      el.textContent =
+        text.slice(0, done) +
+        [...text.slice(done)].map((c) => (c === ' ' ? ' ' : glyphs[Math.floor(Math.random() * glyphs.length)])).join('');
+      if (frame >= frames) clearInterval(timer);
+    }, 32);
+  }
+
+  async function boot(el: HTMLElement) {
+    const c = await clientInfo();
+    const es = el.closest<HTMLElement>('.boot')?.dataset.lang === 'es';
+    const filter = 'com.ivanricog.web.ClientRequestFilter';
+    const request = [
+      logRow('com.ivanricog.web.servlet.DispatcherServlet', ['Completed initialization in 3 ms']),
+      c.ip && logRow(filter, [es ? 'GET / desde ' : 'GET / from ', { value: c.ip, ip: true }]),
+      c.place && logRow(filter, [es ? 'Ubicación aproximada: ' : 'Approximate location: ', { value: c.place }]),
+      logRow(filter, [es ? 'Navegador: ' : 'Browser: ', { value: c.browser }, es ? ', sistema: ' : ', system: ', { value: c.system }]),
+      logRow(filter, [es ? 'Zona horaria: ' : 'Time zone: ', { value: `${c.zone} (${c.utc})` }]),
+    ].filter((r): r is HTMLDivElement => Boolean(r));
+    el.append(...request);
+    if (reduced) return;
+
+    const rows = [...el.querySelectorAll<HTMLElement>('.row')];
+    const delay: Record<string, () => number> = {
+      client: () => 150,
+      banner: () => 55,
+      log: () => 180 + Math.random() * 260,
+      last: () => 650,
+    };
+
+    el.style.height = `${el.offsetHeight}px`;
+    el.classList.add('printing');
+
+    let wait = 250;
+    rows.forEach((r, i) => {
+      const speed = r.dataset.speed ?? 'log';
+      const prev = rows[i - 1]?.dataset.speed;
+      if (prev && prev !== speed && speed !== 'last') wait += speed === 'client' ? 700 : 350;
+      wait += delay[speed]();
+      setTimeout(() => {
+        r.classList.add('shown');
+        r.querySelectorAll<HTMLElement>('.val').forEach(decode);
+        if (i === rows.length - 1) {
+          el.classList.remove('printing');
+          el.style.height = '';
+        }
+      }, wait);
+    });
+  }
+
+  if (consoleEl) boot(consoleEl);
+</script>

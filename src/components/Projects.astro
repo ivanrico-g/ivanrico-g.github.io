@@ -1,0 +1,212 @@
+---
+import { projects, showPlaceholders, l, type Lang } from '../data/profile';
+import { ui } from '../data/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const visible = projects.filter((p) => showPlaceholders || p.status !== 'building');
+const [featured, ...rest] = visible;
+---
+
+<div class="projects">
+  {
+    featured && (
+      <article class="featured">
+        <header class="head">
+          <h3>{l(featured.name, lang)}</h3>
+          <span class="status live">{t.status.live}</span>
+        </header>
+        <p class="summary">{l(featured.summary, lang)}</p>
+        {featured.decisions && (
+          <>
+            <h4>{t.decisions}</h4>
+            <ul class="decisions">
+              {featured.decisions.map((d) => (
+                <li>{l(d, lang)}</li>
+              ))}
+            </ul>
+          </>
+        )}
+        <ul class="tags">
+          {featured.stack.map((s) => (
+            <li class="tag">{s}</li>
+          ))}
+        </ul>
+        {featured.note && <p class="note">{l(featured.note, lang)}</p>}
+      </article>
+    )
+  }
+
+  {
+    rest.length > 0 && (
+      <ul class="grid">
+        {rest.map((p) => (
+          <li class:list={['card', p.status]}>
+            <header class="head">
+              <h3>{l(p.name, lang)}</h3>
+              <span class:list={['status', p.status]}>{t.status[p.status]}</span>
+            </header>
+            <p class="summary">{l(p.summary, lang)}</p>
+            {p.decisions && (
+              <ul class="decisions compact">
+                {p.decisions.map((d) => (
+                  <li>{l(d, lang)}</li>
+                ))}
+              </ul>
+            )}
+            {p.stack.length > 0 && (
+              <ul class="tags">
+                {p.stack.map((s) => (
+                  <li class="tag">{s}</li>
+                ))}
+              </ul>
+            )}
+            {p.note && <p class="note">{l(p.note, lang)}</p>}
+            {p.links && (
+              <p class="links">
+                {p.links.map((link) => (
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">{l(link.label, lang)}</a>
+                ))}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</div>
+
+<style>
+  .projects {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .featured {
+    padding: 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+
+  .featured h3 {
+    font-size: var(--step-3);
+    letter-spacing: -0.02em;
+  }
+
+  .status {
+    font-size: var(--step--1);
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .status::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .status.live::before {
+    background: var(--log-info);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--log-info) 25%, transparent);
+  }
+
+  .summary {
+    margin-top: 0.75rem;
+    max-width: 65ch;
+  }
+
+  h4 {
+    margin: 1.5rem 0 0.6rem;
+    font-size: var(--step-0);
+    font-weight: 600;
+    color: var(--text-strong);
+  }
+
+  .decisions {
+    display: grid;
+    gap: 0.55rem;
+    max-width: 65ch;
+  }
+
+  .decisions li {
+    padding-left: 1rem;
+    border-left: 2px solid var(--accent-soft);
+  }
+
+  .tags {
+    margin-top: 1.25rem;
+  }
+
+  .decisions.compact {
+    margin-top: 1rem;
+    gap: 0.4rem;
+    font-size: var(--step--1);
+  }
+
+  .status.archived::before {
+    background: transparent;
+    border: 1.5px solid var(--muted);
+  }
+
+  .note {
+    margin-top: 1.25rem;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 40em) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .card {
+    padding: 1.4rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .card h3 {
+    font-size: var(--step-1);
+  }
+
+  .card.building {
+    background: transparent;
+    border-style: dashed;
+  }
+
+  .card.building h3,
+  .card.building .summary {
+    color: var(--muted);
+  }
+
+  .links {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1.25rem;
+    font-weight: 600;
+    font-size: var(--step--1);
+  }
+</style>

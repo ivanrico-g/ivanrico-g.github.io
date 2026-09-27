@@ -1,0 +1,118 @@
+<canvas class="dots" aria-hidden="true"></canvas>
+
+<style>
+  .dots {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @media print {
+    .dots {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas.dots')!;
+  const ctx = canvas.getContext('2d')!;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const GAP = 26;
+  const FPS = 24;
+  const LEVELS = 8;
+  const MAX_ALPHA = 0.38;
+
+  let width = 0;
+  let height = 0;
+  let last = 0;
+  let rgb = '';
+  let points: { x: number; y: number; r: number }[] = [];
+
+  const field = (x: number, y: number, t: number) =>
+    Math.sin(x * 0.011 + t * 0.6) * Math.cos(y * 0.009 - t * 0.4) +
+    Math.sin((x + y) * 0.006 + t * 0.3) * 0.6 +
+    Math.cos((x - y * 1.7) * 0.004 - t * 0.2) * 0.5;
+
+  const jitter = (i: number, j: number) => {
+    const s = Math.sin(i * 127.1 + j * 311.7) * 43758.5453;
+    return s - Math.floor(s);
+  };
+
+  const readColor = () => {
+    rgb = getComputedStyle(document.documentElement).getPropertyValue('--dot').trim();
+  };
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    points = [];
+    for (let i = -1; i * GAP < width + GAP; i++) {
+      for (let j = -1; j * GAP < height + GAP; j++) {
+        const r = jitter(i, j);
+        points.push({
+          x: i * GAP + (r - 0.5) * GAP * 0.8,
+          y: j * GAP + (jitter(j, i) - 0.5) * GAP * 0.8,
+          r,
+        });
+      }
+    }
+  }
+
+  function draw(time: number) {
+    const t = time / 1400;
+    const paths = Array.from({ length: LEVELS }, () => new Path2D());
+    for (const p of points) {
+      const f = field(p.x, p.y, t);
+      const alpha = Math.min(Math.max(0, f * 0.22 + p.r * 0.14 - 0.02), MAX_ALPHA);
+      if (alpha < 0.02) continue;
+      const x = p.x + f * 7;
+      const y = p.y + f * 5;
+      const radius = 0.9 + p.r * 0.5;
+      const path = paths[Math.min(LEVELS - 1, Math.floor((alpha / MAX_ALPHA) * LEVELS))];
+      path.moveTo(x + radius, y);
+      path.arc(x, y, radius, 0, Math.PI * 2);
+    }
+    ctx.clearRect(0, 0, width, height);
+    paths.forEach((path, level) => {
+      ctx.fillStyle = `rgba(${rgb}, ${(((level + 0.5) / LEVELS) * MAX_ALPHA).toFixed(3)})`;
+      ctx.fill(path);
+    });
+  }
+
+  function loop(time: number) {
+    if (time - last > 1000 / FPS) {
+      draw(time);
+      last = time;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function start() {
+    readColor();
+    resize();
+    window.addEventListener('resize', () => {
+      resize();
+      draw(performance.now());
+    });
+    new MutationObserver(() => {
+      readColor();
+      draw(performance.now());
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    if (reduced) draw(0);
+    else requestAnimationFrame(loop);
+  }
+
+  const idle = (fn: () => void) =>
+    'requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 200);
+  if (document.readyState === 'complete') idle(start);
+  else window.addEventListener('load', () => idle(start), { once: true });
+</script>
