@@ -34,8 +34,8 @@ export const about: Localized[] = [
     en: 'I am a software developer with more than four years of experience. Most of my work is backend development with Java and Spring Boot for clients in the financial sector. I use onion architecture, SOLID principles and Clean Code. For testing, I use JUnit 5 and Mockito for unit tests, and TestNG for integration tests.',
   },
   {
-    es: 'Como proyecto propio, empecé en 2021 con un sistema para un hotel, y hoy desarrollo Softvibes junto con un colega desarrollador: un sistema de gestión hotelera. Ahí aprendo por cuenta propia a entender las necesidades reales de los clientes, y a desplegar y mantener algo que otros usan todos los días.',
-    en: 'I also have my own project. In 2021, I started with a system for one hotel. Today I build Softvibes with a developer colleague: a hotel management system. There I learn on my own how to understand what clients really need, and how to deploy and maintain a system that people use every day.',
+    es: 'Como proyecto propio, empecé en 2021 con un sistema para un hotel, y hoy desarrollo Andeba junto con un colega desarrollador: un sistema de gestión hotelera. Ahí aprendo por cuenta propia a entender las necesidades reales de los clientes, y a desplegar y mantener algo que otros usan todos los días.',
+    en: 'I also have my own project. In 2021, I started with a system for one hotel. Today I build Andeba with a developer colleague: a hotel management system. There I learn on my own how to understand what clients really need, and how to deploy and maintain a system that people use every day.',
   },
   {
     es: 'Ahora mismo estoy profundizando en Java y buenas prácticas, y ampliando hacia Go, Svelte, arquitectura de software y DevOps.',
@@ -108,7 +108,7 @@ export const experience: Job[] = [
     stack: ['Java', 'Spring Boot', 'JPA / Hibernate', 'SQL Server', 'JUnit 5', 'Mockito', 'TestNG', 'Vaadin', 'Jenkins'],
   },
   {
-    org: 'Softvibes',
+    org: 'Andeba',
     lane: 'own',
     kind: { es: 'Proyecto propio', en: 'Own product' },
     from: '2023-07',
@@ -159,7 +159,7 @@ export const showPlaceholders = true;
 
 export const projects: Project[] = [
   {
-    name: 'Softvibes',
+    name: 'Andeba',
     status: 'live',
     summary: {
       es: 'Sistema para hoteles pequeños y medianos de Colombia: reservas, habitaciones, huéspedes, caja y facturación, para varios hoteles desde una sola plataforma.',
@@ -188,6 +188,7 @@ export const projects: Project[] = [
       es: 'Código privado: es un producto comercial con datos reales de hoteles.',
       en: 'The code is private: it is a commercial product with real hotel data.',
     },
+    links: [{ label: { es: 'Ver sitio', en: 'Visit site' }, href: 'https://andeba.com' }],
   },
   {
     name: 'Hydronotis',

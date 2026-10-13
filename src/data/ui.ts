@@ -4,7 +4,7 @@ export const ui = {
   es: {
     metaTitle: 'Ivan Rico G · Desarrollador Backend Java',
     metaDescription:
-      'Desarrollador backend Java y Spring Boot en Bogotá. Experiencia en el sector financiero y cocreador de Softvibes, sistema de gestión hotelera.',
+      'Desarrollador backend Java y Spring Boot en Bogotá. Experiencia en el sector financiero y cocreador de Andeba, sistema de gestión hotelera.',
     nav: {
       about: 'Sobre mí',
       experience: 'Experiencia',
@@ -33,7 +33,7 @@ export const ui = {
       starting: 'Iniciando IvanRicoApplication en Bogotá, Colombia',
       colono: 'Colono Plaza: mi primer sistema para un hotel',
       artifex: 'Artifex Tech: Analista de Desarrollo, sector financiero',
-      softvibes: 'Softvibes: inicia el sistema para hoteles',
+      andeba: 'Andeba: inicia el sistema para hoteles',
       fullstack: 'Artifex Tech: nuevo rol, Desarrollador Full Stack',
       hydronotis: 'Hydronotis: alertas de cortes de agua por WhatsApp',
       solutions: 'Artifex Tech: Desarrollador de Soluciones y Soporte',
@@ -45,7 +45,7 @@ export const ui = {
   en: {
     metaTitle: 'Ivan Rico G · Backend Java Developer',
     metaDescription:
-      'Backend developer with Java and Spring Boot, based in Bogotá. I work in the financial sector and I am co-creator of Softvibes, a system for hotels.',
+      'Backend developer with Java and Spring Boot, based in Bogotá. I work in the financial sector and I am co-creator of Andeba, a system for hotels.',
     nav: {
       about: 'About',
       experience: 'Experience',
@@ -74,7 +74,7 @@ export const ui = {
       starting: 'Starting IvanRicoApplication in Bogotá, Colombia',
       colono: 'Colono Plaza: my first system for a hotel',
       artifex: 'Artifex Tech: Development Analyst, financial sector',
-      softvibes: 'Softvibes: started the system for hotels',
+      andeba: 'Andeba: started the system for hotels',
       fullstack: 'Artifex Tech: new role, Full Stack Developer',
       hydronotis: 'Hydronotis: WhatsApp alerts for water cuts',
       solutions: 'Artifex Tech: Solutions and Support Developer',
