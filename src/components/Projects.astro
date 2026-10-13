@@ -37,6 +37,13 @@ const [featured, ...rest] = visible;
           ))}
         </ul>
         {featured.note && <p class="note">{l(featured.note, lang)}</p>}
+        {featured.links && (
+          <p class="links">
+            {featured.links.map((link) => (
+              <a href={link.href} target="_blank" rel="noopener noreferrer">{l(link.label, lang)}</a>
+            ))}
+          </p>
+        )}
       </article>
     )
   }
